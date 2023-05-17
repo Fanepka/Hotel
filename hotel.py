@@ -96,7 +96,7 @@ class RoomQuery(MySQL):
         r = await self.fetchall()
         for i in r:
             self.cursor("SELECT * FROM Resident WHERE date_end < %s AND date_start > %s AND room_id = %s", (today, today, i['room_id']))
-            if not self.fetchone():
+            if not await self.fetchone():
                 free.append(Room(**i))
 
             else:
@@ -130,6 +130,8 @@ class ResidentQuery(MySQL):
     async def get_by_room_number(self, room_number: int):
         self.cursor("SELECT * FROM Room WHERE number = %s", (room_number, ))
         r = await self.fetchone()
+        if not r:
+            return None
         
         self.cursor("SELECT * FROM Resident WHERE room_id = %s", (r['room_id']))
         response = await self.fetchall()
